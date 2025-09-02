@@ -1,0 +1,12 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/Login",
+    "pages/Register", 
+    "pages/MuseumList",
+    "pages/MuseumDetail",
+    "pages/BookingPage",
+    "pages/Profile",
+    "pages/BookingHistory"
+  ]
+}

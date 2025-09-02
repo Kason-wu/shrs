@@ -1,0 +1,13 @@
+{
+  "name": "museum-booking-app",
+  "version": "1.0.0",
+  "description": "HarmonyOS Museum Booking System",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Build HarmonyOS app'",
+    "dev": "echo 'Development mode'"
+  },
+  "keywords": ["HarmonyOS", "Museum", "Booking"],
+  "author": "Developer",
+  "license": "MIT"
+}

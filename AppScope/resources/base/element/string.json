@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "博物馆预约系统"
+    },
+    {
+      "name": "app_desc", 
+      "value": "便捷的博物馆参观预约平台"
+    }
+  ]
+}
