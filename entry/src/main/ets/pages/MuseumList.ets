@@ -116,7 +116,7 @@ struct MuseumList {
   MuseumCard(museum: Museum) {
     Column() {
       // 博物馆图片
-      Image($r('app.media.museum_placeholder'))
+      Image($r('app.media.icon'))
         .width('100%')
         .height(120)
         .objectFit(ImageFit.Cover)
@@ -135,7 +135,7 @@ struct MuseumList {
             .layoutWeight(1)
 
           Row() {
-            Image($r('app.media.icon_star'))
+            Image($r('app.media.icon'))
               .width(14)
               .height(14)
               .margin({ right: 4 })
@@ -158,7 +158,7 @@ struct MuseumList {
 
         // 位置和距离
         Row() {
-          Image($r('app.media.icon_location'))
+          Image($r('app.media.icon'))
             .width(12)
             .height(12)
             .margin({ right: 4 })
@@ -213,7 +213,7 @@ struct MuseumList {
       // 顶部导航
       Row() {
         Button() {
-          Image($r('app.media.icon_back'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }
@@ -232,7 +232,7 @@ struct MuseumList {
         Blank()
 
         Button() {
-          Image($r('app.media.icon_search'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }
@@ -307,7 +307,7 @@ struct MuseumList {
         // 底部提示
         if (this.getFilteredMuseums().length === 0) {
           Column() {
-            Image($r('app.media.icon_empty'))
+            Image($r('app.media.icon'))
               .width(80)
               .height(80)
               .margin({ bottom: 16 })

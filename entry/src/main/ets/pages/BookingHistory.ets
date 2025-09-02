@@ -196,7 +196,7 @@ struct BookingHistory {
     Column() {
       // 博物馆信息
       Row() {
-        Image($r('app.media.museum_placeholder'))
+        Image($r('app.media.icon'))
           .width(60)
           .height(60)
           .objectFit(ImageFit.Cover)
@@ -380,7 +380,7 @@ struct BookingHistory {
       // 顶部导航
       Row() {
         Button() {
-          Image($r('app.media.icon_back'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }
@@ -436,7 +436,7 @@ struct BookingHistory {
         } else {
           // 空状态
           Column() {
-            Image($r('app.media.icon_empty'))
+            Image($r('app.media.icon'))
               .width(80)
               .height(80)
               .margin({ bottom: 16 })

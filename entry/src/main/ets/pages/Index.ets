@@ -74,7 +74,7 @@ struct Index {
       Column() {
         // 欢迎区域
         Column() {
-          Image($r('app.media.museum_banner'))
+          Image($r('app.media.icon'))
             .width('100%')
             .height(200)
             .objectFit(ImageFit.Cover)
@@ -98,7 +98,7 @@ struct Index {
         Grid() {
           GridItem() {
             Column() {
-              Image($r('app.media.icon_museum'))
+              Image($r('app.media.icon'))
                 .width(48)
                 .height(48)
                 .margin({ bottom: 8 })
@@ -119,7 +119,7 @@ struct Index {
 
           GridItem() {
             Column() {
-              Image($r('app.media.icon_booking'))
+              Image($r('app.media.icon'))
                 .width(48)
                 .height(48)
                 .margin({ bottom: 8 })
@@ -144,7 +144,7 @@ struct Index {
 
           GridItem() {
             Column() {
-              Image($r('app.media.icon_profile'))
+              Image($r('app.media.icon'))
                 .width(48)
                 .height(48)
                 .margin({ bottom: 8 })
@@ -169,7 +169,7 @@ struct Index {
 
           GridItem() {
             Column() {
-              Image($r('app.media.icon_help'))
+              Image($r('app.media.icon'))
                 .width(48)
                 .height(48)
                 .margin({ bottom: 8 })

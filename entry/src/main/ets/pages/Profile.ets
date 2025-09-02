@@ -105,7 +105,7 @@ struct Profile {
       // 用户头像和基本信息
       Row() {
         // 头像
-        Image($r('app.media.default_avatar'))
+        Image($r('app.media.icon'))
           .width(60)
           .height(60)
           .borderRadius(30)
@@ -139,7 +139,7 @@ struct Profile {
 
         // 编辑按钮
         Button() {
-          Image($r('app.media.icon_edit'))
+          Image($r('app.media.icon'))
             .width(20)
             .height(20)
         }
@@ -240,7 +240,7 @@ struct Profile {
       .layoutWeight(1)
       .alignItems(HorizontalAlign.Start)
 
-      Image($r('app.media.icon_arrow_right'))
+      Image($r('app.media.icon'))
         .width(16)
         .height(16)
     }
@@ -258,7 +258,7 @@ struct Profile {
       // 顶部导航
       Row() {
         Button() {
-          Image($r('app.media.icon_back'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }
@@ -277,7 +277,7 @@ struct Profile {
         Blank()
 
         Button() {
-          Image($r('app.media.icon_message'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }

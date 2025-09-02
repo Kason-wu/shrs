@@ -56,7 +56,7 @@ struct Login {
       // 顶部导航
       Row() {
         Button() {
-          Image($r('app.media.icon_back'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }
@@ -83,7 +83,7 @@ struct Login {
       Column() {
         // Logo区域
         Column() {
-          Image($r('app.media.app_icon'))
+          Image($r('app.media.icon'))
             .width(80)
             .height(80)
             .margin({ bottom: 16 })

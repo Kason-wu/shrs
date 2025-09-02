@@ -209,7 +209,7 @@ struct MuseumDetail {
         ForEach(this.exhibitions, (exhibition: Exhibition) => {
           Column() {
             Row() {
-              Image($r('app.media.exhibition_placeholder'))
+              Image($r('app.media.icon'))
                 .width(80)
                 .height(60)
                 .objectFit(ImageFit.Cover)
@@ -248,7 +248,7 @@ struct MuseumDetail {
         })
       } else {
         Column() {
-          Image($r('app.media.icon_empty'))
+          Image($r('app.media.icon'))
             .width(60)
             .height(60)
             .margin({ bottom: 16 })
@@ -305,7 +305,7 @@ struct MuseumDetail {
     Column() {
       // 顶部图片和导航
       Stack({ alignContent: Alignment.TopStart }) {
-        Image($r('app.media.museum_detail_banner'))
+        Image($r('app.media.icon'))
           .width('100%')
           .height(250)
           .objectFit(ImageFit.Cover)
@@ -313,7 +313,7 @@ struct MuseumDetail {
         // 顶部导航按钮
         Row() {
           Button() {
-            Image($r('app.media.icon_back_white'))
+            Image($r('app.media.icon'))
               .width(24)
               .height(24)
           }
@@ -328,7 +328,7 @@ struct MuseumDetail {
           Blank()
 
           Button() {
-            Image(this.isFavorite ? $r('app.media.icon_heart_filled') : $r('app.media.icon_heart'))
+            Image(this.isFavorite ? $r('app.media.icon') : $r('app.media.icon'))
               .width(24)
               .height(24)
           }
@@ -356,7 +356,7 @@ struct MuseumDetail {
               .margin({ bottom: 4 })
 
             Row() {
-              Image($r('app.media.icon_location'))
+              Image($r('app.media.icon'))
                 .width(14)
                 .height(14)
                 .margin({ right: 4 })
@@ -376,7 +376,7 @@ struct MuseumDetail {
 
           Column() {
             Row() {
-              Image($r('app.media.icon_star'))
+              Image($r('app.media.icon'))
                 .width(16)
                 .height(16)
                 .margin({ right: 4 })

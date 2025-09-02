@@ -3,7 +3,7 @@
  */
 @Component
 export struct EmptyState {
-  @Prop icon: Resource = $r('app.media.icon_empty');
+  @Prop icon: Resource = $r('app.media.icon');
   @Prop title: string = '暂无数据';
   @Prop subtitle: string = '';
   @Prop buttonText: string = '';

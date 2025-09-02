@@ -94,7 +94,7 @@ struct Register {
       // 顶部导航
       Row() {
         Button() {
-          Image($r('app.media.icon_back'))
+          Image($r('app.media.icon'))
             .width(24)
             .height(24)
         }

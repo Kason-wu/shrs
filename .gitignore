@@ -5,6 +5,9 @@
 /oh_modules/
 local.properties
 
+# OHPM Files
+.ohpmrc.user
+
 # IDE Files
 /.idea/
 *.iml

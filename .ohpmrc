@@ -1,0 +1,3 @@
+registry=https://ohpm.openharmony.cn/ohpm/
+strict_ssl=true
+@ohos:registry=https://ohpm.openharmony.cn/ohpm/
