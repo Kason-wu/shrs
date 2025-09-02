@@ -1,0 +1,28 @@
+{
+  "hvigorVersion": "4.0.5",
+  "dependencies": {
+    "@ohos/hvigor-ohos-plugin": "4.0.5"
+  },
+  "execution": {
+    // 是否守护进程模式，默认值为true
+    "daemon": true,
+    // 增量编译开关，默认值为true
+    "incremental": true,
+    // 并行编译开关，默认值为true
+    "parallel": true,
+    // 编译缓存开关，默认值为false
+    "typeCheck": false
+  },
+  "logging": {
+    // 日志级别，可选值：debug, info, warn, error，默认值为info
+    "level": "info"
+  },
+  "debugging": {
+    // 调试模式开关，默认值为false
+    "stacktrace": false
+  },
+  "nodeOptions": {
+    // Node.js最大内存限制，默认值为4GB
+    "maxOldSpaceSize": 4096
+  }
+}

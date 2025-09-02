@@ -1,0 +1,10 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "博物馆预约系统主模块",
+  "main": "index.js",
+  "author": "Developer",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {}
+}

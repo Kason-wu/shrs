@@ -1,0 +1,13 @@
+{
+  "name": "museum-booking-app",
+  "version": "1.0.0",
+  "description": "博物馆预约系统 - HarmonyOS应用",
+  "main": "index.js",
+  "author": "Developer",
+  "license": "Apache-2.0",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hvigor-ohos-plugin": "4.0.5",
+    "@ohos/hvigor": "4.0.5"
+  }
+}

@@ -3,7 +3,7 @@
 /node_modules/
 /.hvigor/
 /oh_modules/
-/local.properties
+local.properties
 
 # IDE Files
 /.idea/
