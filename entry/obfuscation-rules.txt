@@ -1,0 +1,23 @@
+# 混淆规则文件
+# 保持应用入口类
+-keep class * extends ohos.aafwk.ability.Ability
+-keep class * extends ohos.ace.ability.AceAbility
+
+# 保持页面类
+-keep @ohos.ace.annotation.Entry class *
+-keep @ohos.ace.annotation.Component class *
+
+# 保持导出的类和方法
+-keep class * {
+    public *;
+}
+
+# 保持枚举类
+-keep enum * {
+    *;
+}
+
+# 保持接口
+-keep interface * {
+    *;
+}

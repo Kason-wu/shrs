@@ -1,0 +1,12 @@
+# 消费者混淆规则
+# 这个文件定义了当前模块作为依赖被其他模块使用时的混淆规则
+
+# 保持公共API
+-keep public class * {
+    public *;
+}
+
+# 保持导出的接口
+-keep public interface * {
+    *;
+}

@@ -1,7 +1,7 @@
 {
-  "hvigorVersion": "4.0.5",
+  "hvigorVersion": "4.1.0",
   "dependencies": {
-    "@ohos/hvigor-ohos-plugin": "4.0.5"
+    "@ohos/hvigor-ohos-plugin": "4.1.0"
   },
   "execution": {
     // 是否守护进程模式，默认值为true
