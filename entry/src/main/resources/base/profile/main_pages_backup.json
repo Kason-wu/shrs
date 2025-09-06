@@ -6,7 +6,6 @@
     "pages/MuseumList",
     "pages/MuseumDetail",
     "pages/BookingPage",
-    "pages/BookingConfirmation",
     "pages/Profile",
     "pages/BookingHistory"
   ]

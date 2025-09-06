@@ -1,154 +1,100 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
-
-interface BookingRecord {
-  id: string;
-  museum: any;
-  date: string;
-  timeSlot: any;
-  visitorCount: number;
-  visitorName: string;
-  visitorPhone: string;
-  totalPrice: number;
-  status: string; // 'confirmed', 'cancelled', 'completed'
-  bookingTime: string;
-}
+import { BookingService, BookingRecord, BookingStatus, BookingStatistics } from '../common/services/BookingService';
+import { DateUtils } from '../common/utils/DateUtils';
+import { BookingFilter } from '../common/components/BookingFilter';
 
 @Entry
-@Component
+@ComponentV2
 struct BookingHistory {
-  @State bookings: BookingRecord[] = [];
-  @State currentTab: number = 0; // 0: 全部, 1: 待参观, 2: 已完成, 3: 已取消
-  @State tabs: string[] = ['全部', '待参观', '已完成', '已取消'];
+  @Local bookings: BookingRecord[] = [];
+  @Local filteredBookings: BookingRecord[] = [];
+  @Local currentTab: number = 0; // 0: 全部, 1: 待参观, 2: 已完成, 3: 已取消
+  @Local tabs: string[] = ['全部', '待参观', '已完成', '已取消'];
+  @Local statistics: BookingStatistics | null = null;
+  @Local showStatistics: boolean = false;
+  @Local showFilter: boolean = false;
+  
+  private bookingService: BookingService = BookingService.getInstance();
 
   aboutToAppear() {
     this.loadBookings();
+    this.loadStatistics();
+    // 清理过期预约
+    this.bookingService.cleanupExpiredBookings();
   }
 
   loadBookings() {
-    // 从本地存储加载预约记录
-    const savedBookings = AppStorage.Get('userBookings') as BookingRecord[] || [];
-    
-    // 添加一些示例数据（如果没有真实数据）
-    if (savedBookings.length === 0) {
-      const sampleBookings: BookingRecord[] = [
-        {
-          id: '1',
-          museum: {
-            id: 1,
-            name: '国家博物馆',
-            location: '北京市东城区',
-            image: 'museum1.jpg'
-          },
-          date: '2024-09-15',
-          timeSlot: { time: '09:00-10:00' },
-          visitorCount: 2,
-          visitorName: '张三',
-          visitorPhone: '138****8888',
-          totalPrice: 0,
-          status: 'confirmed',
-          bookingTime: '2024-09-01T10:30:00Z'
-        },
-        {
-          id: '2',
-          museum: {
-            id: 2,
-            name: '故宫博物院',
-            location: '北京市东城区',
-            image: 'museum2.jpg'
-          },
-          date: '2024-08-20',
-          timeSlot: { time: '14:00-15:00' },
-          visitorCount: 1,
-          visitorName: '张三',
-          visitorPhone: '138****8888',
-          totalPrice: 60,
-          status: 'completed',
-          bookingTime: '2024-08-15T14:20:00Z'
-        },
-        {
-          id: '3',
-          museum: {
-            id: 3,
-            name: '中国科技馆',
-            location: '北京市朝阳区',
-            image: 'museum3.jpg'
-          },
-          date: '2024-07-10',
-          timeSlot: { time: '10:00-11:00' },
-          visitorCount: 3,
-          visitorName: '张三',
-          visitorPhone: '138****8888',
-          totalPrice: 90,
-          status: 'cancelled',
-          bookingTime: '2024-07-05T09:15:00Z'
-        }
-      ];
-      this.bookings = sampleBookings;
-    } else {
-      this.bookings = savedBookings;
-    }
+    this.bookings = this.bookingService.getAllBookings();
+    this.filteredBookings = this.getFilteredBookings();
+  }
+
+  loadStatistics() {
+    this.statistics = this.bookingService.getBookingStatistics();
   }
 
   getFilteredBookings(): BookingRecord[] {
     if (this.currentTab === 0) {
       return this.bookings;
     } else if (this.currentTab === 1) {
-      return this.bookings.filter(booking => booking.status === 'confirmed');
+      return this.bookingService.getBookingsByStatus(BookingStatus.CONFIRMED);
     } else if (this.currentTab === 2) {
-      return this.bookings.filter(booking => booking.status === 'completed');
+      return this.bookingService.getBookingsByStatus(BookingStatus.COMPLETED);
     } else if (this.currentTab === 3) {
-      return this.bookings.filter(booking => booking.status === 'cancelled');
+      return this.bookingService.getBookingsByStatus(BookingStatus.CANCELLED);
     }
     return [];
   }
 
-  getStatusText(status: string): string {
+  onFilterChange = (filtered: BookingRecord[]) => {
+    this.filteredBookings = filtered;
+  }
+
+  onTabChange(index: number) {
+    this.currentTab = index;
+    this.filteredBookings = this.getFilteredBookings();
+  }
+
+  getStatusText(status: BookingStatus): string {
     switch (status) {
-      case 'confirmed':
+      case BookingStatus.CONFIRMED:
         return '待参观';
-      case 'completed':
+      case BookingStatus.COMPLETED:
         return '已完成';
-      case 'cancelled':
+      case BookingStatus.CANCELLED:
         return '已取消';
+      case BookingStatus.PENDING:
+        return '处理中';
       default:
         return '未知';
     }
   }
 
-  getStatusColor(status: string): string {
+  getStatusColor(status: BookingStatus): string {
     switch (status) {
-      case 'confirmed':
+      case BookingStatus.CONFIRMED:
         return '#007DFF';
-      case 'completed':
+      case BookingStatus.COMPLETED:
         return '#00C853';
-      case 'cancelled':
+      case BookingStatus.CANCELLED:
         return '#99182431';
+      case BookingStatus.PENDING:
+        return '#FF9500';
       default:
         return '#99182431';
     }
   }
 
   formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const weekday = weekdays[date.getDay()];
-    return `${month}月${day}日 ${weekday}`;
+    return DateUtils.formatDateChinese(dateStr);
   }
 
   formatBookingTime(timeStr: string): string {
-    const date = new Date(timeStr);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    return `${month}月${day}日 ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return DateUtils.formatDateTime(timeStr);
   }
 
-  cancelBooking(booking: BookingRecord) {
-    if (booking.status !== 'confirmed') {
+  async cancelBooking(booking: BookingRecord) {
+    if (booking.status !== BookingStatus.CONFIRMED) {
       return;
     }
 
@@ -165,18 +111,21 @@ struct BookingHistory {
           color: '#FF3B30'
         }
       ]
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.index === 1) {
-        // 更新预约状态
-        const index = this.bookings.findIndex(b => b.id === booking.id);
-        if (index !== -1) {
-          this.bookings[index].status = 'cancelled';
-          
-          // 保存到本地存储
-          AppStorage.SetOrCreate('userBookings', this.bookings);
-          
+        const cancelResult = await this.bookingService.cancelBooking(booking.id);
+        
+        if (cancelResult.success) {
           promptAction.showToast({
             message: '预约已取消',
+            duration: 2000
+          });
+          // 重新加载数据
+          this.loadBookings();
+          this.loadStatistics();
+        } else {
+          promptAction.showToast({
+            message: cancelResult.error || '取消失败，请重试',
             duration: 2000
           });
         }
@@ -189,6 +138,116 @@ struct BookingHistory {
       url: 'pages/BookingPage',
       params: { museum: booking.museum }
     });
+  }
+
+  @Builder
+  StatisticsCard() {
+    if (this.statistics) {
+      Column() {
+        Row() {
+          Text('预约统计')
+            .fontSize(16)
+            .fontWeight(FontWeight.Bold)
+            .fontColor('#182431')
+          
+          Blank()
+          
+          Button(this.showStatistics ? '收起' : '展开')
+            .height(28)
+            .backgroundColor('#F5F5F5')
+            .fontColor('#007DFF')
+            .fontSize(12)
+            .onClick(() => {
+              this.showStatistics = !this.showStatistics;
+            })
+        }
+        .width('100%')
+        .margin({ bottom: 12 })
+
+        if (this.showStatistics) {
+          Column() {
+            // 预约数量统计
+            Row() {
+              Column() {
+                Text(this.statistics.totalBookings.toString())
+                  .fontSize(20)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor('#007DFF')
+                Text('总预约')
+                  .fontSize(12)
+                  .fontColor('#99182431')
+              }
+              .layoutWeight(1)
+
+              Column() {
+                Text(this.statistics.confirmedBookings.toString())
+                  .fontSize(20)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor('#FF9500')
+                Text('待参观')
+                  .fontSize(12)
+                  .fontColor('#99182431')
+              }
+              .layoutWeight(1)
+
+              Column() {
+                Text(this.statistics.completedBookings.toString())
+                  .fontSize(20)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor('#00C853')
+                Text('已完成')
+                  .fontSize(12)
+                  .fontColor('#99182431')
+              }
+              .layoutWeight(1)
+
+              Column() {
+                Text(`¥${this.statistics.totalSpent}`)
+                  .fontSize(20)
+                  .fontWeight(FontWeight.Bold)
+                  .fontColor('#FF6B35')
+                Text('总消费')
+                  .fontSize(12)
+                  .fontColor('#99182431')
+              }
+              .layoutWeight(1)
+            }
+            .width('100%')
+            .margin({ bottom: 16 })
+
+            // 常访问博物馆
+            if (this.statistics.favoriteMuseums.length > 0) {
+              Column() {
+                Text('常访问博物馆')
+                  .fontSize(14)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor('#182431')
+                  .alignSelf(ItemAlign.Start)
+                  .margin({ bottom: 8 })
+
+                ForEach(this.statistics.favoriteMuseums, (museum: string, index: number) => {
+                  Row() {
+                    Text(`${index + 1}. ${museum}`)
+                      .fontSize(12)
+                      .fontColor('#99182431')
+                  }
+                  .width('100%')
+                  .margin({ bottom: 4 })
+                })
+              }
+              .width('100%')
+              .alignItems(HorizontalAlign.Start)
+            }
+          }
+          .width('100%')
+        }
+      }
+      .width('100%')
+      .padding(16)
+      .backgroundColor('#FFFFFF')
+      .borderRadius(12)
+      .margin({ bottom: 12 })
+    }
   }
 
   @Builder
@@ -316,7 +375,7 @@ struct BookingHistory {
 
       // 操作按钮
       Row() {
-        if (booking.status === 'confirmed') {
+        if (booking.status === BookingStatus.CONFIRMED) {
           Button('取消预约')
             .height(32)
             .backgroundColor('#FFFFFF')
@@ -342,7 +401,7 @@ struct BookingHistory {
                 params: { museum: booking.museum }
               });
             })
-        } else if (booking.status === 'completed') {
+        } else if (booking.status === BookingStatus.COMPLETED) {
           Button('再次预约')
             .height(32)
             .backgroundColor('#007DFF')
@@ -352,7 +411,7 @@ struct BookingHistory {
             .onClick(() => {
               this.rebookMuseum(booking);
             })
-        } else if (booking.status === 'cancelled') {
+        } else if (booking.status === BookingStatus.CANCELLED) {
           Button('重新预约')
             .height(32)
             .backgroundColor('#007DFF')
@@ -397,6 +456,18 @@ struct BookingHistory {
           .fontColor('#182431')
 
         Blank()
+
+        Button() {
+          Image($r('app.media.icon'))
+            .width(20)
+            .height(20)
+        }
+        .width(40)
+        .height(40)
+        .backgroundColor(Color.Transparent)
+        .onClick(() => {
+          this.showFilter = !this.showFilter;
+        })
       }
       .width('100%')
       .height(56)
@@ -413,17 +484,32 @@ struct BookingHistory {
               .fontWeight(this.currentTab === index ? FontWeight.Bold : FontWeight.Normal)
               .padding({ left: 16, right: 16, top: 12, bottom: 12 })
               .onClick(() => {
-                this.currentTab = index;
+                this.onTabChange(index);
               })
           })
         }
         .width('100%')
         .backgroundColor('#FFFFFF')
 
+        // 筛选组件
+        if (this.showFilter) {
+          BookingFilter({
+            bookings: this.getFilteredBookings(),
+            onFilterChange: this.onFilterChange
+          })
+        }
+
         // 预约列表
-        if (this.getFilteredBookings().length > 0) {
+        if (this.filteredBookings.length > 0) {
           List() {
-            ForEach(this.getFilteredBookings(), (booking: BookingRecord) => {
+            // 统计卡片（仅在全部标签页显示）
+            if (this.currentTab === 0) {
+              ListItem() {
+                this.StatisticsCard()
+              }
+            }
+            
+            ForEach(this.filteredBookings, (booking: BookingRecord) => {
               ListItem() {
                 this.BookingCard(booking)
               }

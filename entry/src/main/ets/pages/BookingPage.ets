@@ -1,41 +1,14 @@
 import router from '@ohos.router';
 import promptAction from '@ohos.promptAction';
-
-interface Museum {
-  id: number;
-  name: string;
-  description: string;
-  image: string;
-  location: string;
-  rating: number;
-  price: number;
-  openTime: string;
-  tags: string[];
-  distance: string;
-}
-
-interface TimeSlot {
-  id: string;
-  time: string;
-  available: number;
-  total: number;
-}
-
-interface BookingInfo {
-  museum: Museum;
-  date: string;
-  timeSlot: TimeSlot;
-  visitorCount: number;
-  visitorName: string;
-  visitorPhone: string;
-  visitorIdCard: string;
-  totalPrice: number;
-}
+import { BookingService, Museum, TimeSlot, BookingRecord } from '../common/services/BookingService';
+import { DateUtils } from '../common/utils/DateUtils';
+import { ValidationUtils } from '../common/utils/ValidationUtils';
+import { AppConstants } from '../common/constants/AppConstants';
 
 @Entry
-@Component
+@ComponentV2
 struct BookingPage {
-  @State museum: Museum = {
+  @Local museum: Museum = {
     id: 1,
     name: '国家博物馆',
     description: '中国历史文化的重要展示窗口',
@@ -48,24 +21,21 @@ struct BookingPage {
     distance: '2.3km'
   };
 
-  @State selectedDate: string = '';
-  @State selectedTimeSlot: TimeSlot | null = null;
-  @State visitorCount: number = 1;
-  @State visitorName: string = '';
-  @State visitorPhone: string = '';
-  @State visitorIdCard: string = '';
-  @State currentStep: number = 0; // 0: 选择日期时间, 1: 填写信息, 2: 确认订单
-  @State isLoading: boolean = false;
+  @Local selectedDate: string = '';
+  @Local selectedTimeSlot: TimeSlot | null = null;
+  @Local visitorCount: number = 1;
+  @Local visitorName: string = '';
+  @Local visitorPhone: string = '';
+  @Local visitorIdCard: string = '';
+  @Local currentStep: number = 0; // 0: 选择日期时间, 1: 填写信息, 2: 确认订单
+  @Local isLoading: boolean = false;
+  @Local validationErrors: string[] = [];
+  @Local validationWarnings: string[] = [];
 
-  @State availableDates: string[] = [];
-  @State timeSlots: TimeSlot[] = [
-    { id: '1', time: '09:00-10:00', available: 45, total: 50 },
-    { id: '2', time: '10:00-11:00', available: 32, total: 50 },
-    { id: '3', time: '11:00-12:00', available: 28, total: 50 },
-    { id: '4', time: '14:00-15:00', available: 38, total: 50 },
-    { id: '5', time: '15:00-16:00', available: 41, total: 50 },
-    { id: '6', time: '16:00-17:00', available: 35, total: 50 }
-  ];
+  @Local availableDates: string[] = [];
+  @Local timeSlots: TimeSlot[] = [];
+  
+  private bookingService: BookingService = BookingService.getInstance();
 
   aboutToAppear() {
     const params = router.getParams() as { museum: Museum };
@@ -73,29 +43,21 @@ struct BookingPage {
       this.museum = params.museum;
     }
     this.generateAvailableDates();
+    this.loadTimeSlots();
   }
 
   generateAvailableDates() {
-    const dates: string[] = [];
-    const today = new Date();
-    
-    for (let i = 1; i <= 30; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-      dates.push(dateStr);
+    this.availableDates = DateUtils.getFutureDates(AppConstants.BOOKING_ADVANCE_DAYS);
+  }
+
+  loadTimeSlots() {
+    if (this.selectedDate) {
+      this.timeSlots = this.bookingService.getAvailableTimeSlots(this.museum.id, this.selectedDate);
     }
-    
-    this.availableDates = dates;
   }
 
   formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekday = weekdays[date.getDay()];
-    return `${month}月${day}日 ${weekday}`;
+    return DateUtils.formatDateChinese(dateStr);
   }
 
   getTotalPrice(): number {
@@ -103,18 +65,33 @@ struct BookingPage {
   }
 
   validateForm(): boolean {
-    if (!this.visitorName.trim()) {
-      promptAction.showToast({ message: '请输入参观者姓名', duration: 2000 });
-      return false;
+    this.validationErrors = [];
+    this.validationWarnings = [];
+
+    // 验证参观者信息
+    if (!ValidationUtils.validateName(this.visitorName)) {
+      this.validationErrors.push('请输入有效的参观者姓名');
     }
     
-    if (!this.visitorPhone.trim() || !/^1[3-9]\d{9}$/.test(this.visitorPhone)) {
-      promptAction.showToast({ message: '请输入有效的手机号码', duration: 2000 });
-      return false;
+    if (!ValidationUtils.validatePhone(this.visitorPhone)) {
+      this.validationErrors.push('请输入有效的手机号码');
     }
     
-    if (!this.visitorIdCard.trim() || !/^\d{17}[\dXx]$/.test(this.visitorIdCard)) {
-      promptAction.showToast({ message: '请输入有效的身份证号码', duration: 2000 });
+    if (!ValidationUtils.validateIdCard(this.visitorIdCard)) {
+      this.validationErrors.push('请输入有效的身份证号码');
+    }
+
+    // 检查预约冲突
+    if (this.selectedTimeSlot && this.bookingService.hasConflictingBooking(this.selectedDate, this.selectedTimeSlot)) {
+      this.validationErrors.push('您在该时间段已有预约');
+    }
+
+    // 显示错误信息
+    if (this.validationErrors.length > 0) {
+      promptAction.showToast({ 
+        message: this.validationErrors[0], 
+        duration: 2000 
+      });
       return false;
     }
     
@@ -122,41 +99,55 @@ struct BookingPage {
   }
 
   async submitBooking() {
+    if (!this.selectedTimeSlot) {
+      promptAction.showToast({ message: '请选择时间段', duration: 2000 });
+      return;
+    }
+
     this.isLoading = true;
     
-    // 模拟提交预约
-    setTimeout(() => {
-      this.isLoading = false;
-      
-      // 保存预约记录到本地存储
-      const bookingRecord = {
-        id: Date.now().toString(),
+    try {
+      // 创建预约数据
+      const bookingData = {
         museum: this.museum,
         date: this.selectedDate,
         timeSlot: this.selectedTimeSlot,
         visitorCount: this.visitorCount,
         visitorName: this.visitorName,
         visitorPhone: this.visitorPhone,
-        totalPrice: this.getTotalPrice(),
-        status: 'confirmed',
-        bookingTime: new Date().toISOString()
+        visitorIdCard: this.visitorIdCard,
+        totalPrice: this.getTotalPrice()
       };
+
+      // 使用预约服务创建预约
+      const result = await this.bookingService.createBooking(bookingData);
       
-      // 获取现有预约记录
-      const existingBookings = AppStorage.Get('userBookings') as any[] || [];
-      existingBookings.push(bookingRecord);
-      AppStorage.SetOrCreate('userBookings', existingBookings);
+      this.isLoading = false;
       
+      if (result.success) {
+        promptAction.showToast({
+          message: '预约成功！',
+          duration: 2000
+        });
+        
+        // 跳转到预约确认页面
+        router.replaceUrl({
+          url: 'pages/BookingConfirmation',
+          params: { booking: result.booking }
+        });
+      } else {
+        promptAction.showToast({
+          message: result.error || '预约失败，请重试',
+          duration: 2000
+        });
+      }
+    } catch (error) {
+      this.isLoading = false;
       promptAction.showToast({
-        message: '预约成功！',
+        message: '预约失败，请重试',
         duration: 2000
       });
-      
-      // 跳转到预约历史页面
-      router.replaceUrl({
-        url: 'pages/BookingHistory'
-      });
-    }, 2000);
+    }
   }
 
   @Builder
@@ -212,6 +203,7 @@ struct BookingPage {
               .onClick(() => {
                 this.selectedDate = date;
                 this.selectedTimeSlot = null;
+                this.loadTimeSlots(); // 重新加载时间段
               })
             }
           })
@@ -258,12 +250,12 @@ struct BookingPage {
                 .borderRadius(8)
                 .justifyContent(FlexAlign.Center)
                 .onClick(() => {
-                  if (slot.available > 0) {
+                  if (slot.isAvailable && slot.available > 0) {
                     this.selectedTimeSlot = slot;
                   }
                 })
-                .enabled(slot.available > 0)
-                .opacity(slot.available > 0 ? 1 : 0.5)
+                .enabled(slot.isAvailable && slot.available > 0)
+                .opacity(slot.isAvailable && slot.available > 0 ? 1 : 0.5)
               }
             })
           }
