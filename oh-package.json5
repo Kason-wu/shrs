@@ -7,11 +7,11 @@
   "license": "Apache-2.0",
   "dependencies": {},
   "devDependencies": {
-    "@ohos/hvigor-ohos-plugin": "4.1.0",
-    "@ohos/hvigor": "4.1.0"
+    "@ohos/hvigor-ohos-plugin": "5.0.5",
+    "@ohos/hvigor": "5.0.5"
   },
   "overrides": {
-    "@ohos/hvigor-ohos-plugin": "4.1.0",
-    "@ohos/hvigor": "4.1.0"
+    "@ohos/hvigor-ohos-plugin": "5.0.5",
+    "@ohos/hvigor": "5.0.5"
   }
 }

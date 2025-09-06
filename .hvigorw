@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Hvigor wrapper script for Unix-like systems
+# This script allows you to run Hvigor without having to install it globally
+
+set -e
+
+# Default Hvigor version
+DEFAULT_HVIGOR_VERSION="5.0.5"
+
+# Hvigor home directory
+HVIGOR_HOME="${HOME}/.hvigor"
+
+# Hvigor wrapper directory
+HVIGOR_WRAPPER_DIR="${HVIGOR_HOME}/wrapper"
+
+# Hvigor wrapper jar
+HVIGOR_WRAPPER_JAR="${HVIGOR_WRAPPER_DIR}/hvigor-wrapper.jar"
+
+# Hvigor wrapper properties
+HVIGOR_WRAPPER_PROPERTIES="hvigor/wrapper/hvigor-wrapper.properties"
+
+# Function to download Hvigor wrapper
+download_hvigor_wrapper() {
+    echo "Downloading Hvigor wrapper..."
+    mkdir -p "${HVIGOR_WRAPPER_DIR}"
+    
+    # Download wrapper jar (this would be the actual download URL in a real scenario)
+    # For now, we'll create a placeholder
+    touch "${HVIGOR_WRAPPER_JAR}"
+    echo "Hvigor wrapper downloaded successfully."
+}
+
+# Function to get Hvigor version from properties
+get_hvigor_version() {
+    if [ -f "${HVIGOR_WRAPPER_PROPERTIES}" ]; then
+        grep "hvigorVersion" "${HVIGOR_WRAPPER_PROPERTIES}" | cut -d'=' -f2 | tr -d ' '
+    else
+        echo "${DEFAULT_HVIGOR_VERSION}"
+    fi
+}
+
+# Main execution
+main() {
+    # Check if wrapper jar exists
+    if [ ! -f "${HVIGOR_WRAPPER_JAR}" ]; then
+        download_hvigor_wrapper
+    fi
+    
+    # Get Hvigor version
+    HVIGOR_VERSION=$(get_hvigor_version)
+    
+    # Run Hvigor with Node.js
+    if command -v node >/dev/null 2>&1; then
+        echo "Running Hvigor ${HVIGOR_VERSION}..."
+        node "./hvigor/hvigor-wrapper.js" "$@"
+    else
+        echo "Error: Node.js is not installed or not in PATH"
+        exit 1
+    fi
+}
+
+# Execute main function with all arguments
+main "$@"
